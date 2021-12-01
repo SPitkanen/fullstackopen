@@ -1,9 +1,22 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import personService from './services/persons'
 
-const Person = ({ person }) => {
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div className="error">
+      {message}
+    </div>
+  )
+}
+
+const Person = ({ person, action }) => {
   return (
     <div>
-      <p>{person.name}, {person.number}</p>
+      <p>{person.name}, {person.number}</p><button onClick={() => action(person)}>Remove</button>
     </div>
   )
 }
@@ -11,7 +24,7 @@ const Person = ({ person }) => {
 const ShowPersons = (props) => {
   return (
     <div>
-      {props.persons.filter(person => person.name.includes(props.filter) || person.number.includes(props.filter)).map(person => <Person key={person.name} person={person} />)}
+      {props.persons.filter(person => person.name.toLowerCase().includes(props.filter.toLowerCase()) || person.number.includes(props.filter.toLowerCase())).map(person => <Person key={person.name} person={person} action={props.action} />)}
     </div>
   )
 }
@@ -41,16 +54,25 @@ const AddPerson = (props) => {
 }
 
 const App = () => {
-  const [ persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', show: true },
-    { name: 'Ada Lovelace', number: '39-44-5323523', show: true },
-    { name: 'Dan Abramov', number: '12-43-234345', show: true },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', show: true }
-  ]) 
+  const [ persons, setPersons] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
+  const [message, setMessage] = useState(null)
 
+  useEffect(() => {
+    personService
+      .getAll()
+        .then(initialPersons => {
+          setPersons(initialPersons)
+        })
+  }, [])
+
+  const timeout = () => {
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
+  }
   const addPerson = (event) => {
     event.preventDefault()
     const personObject = {
@@ -59,13 +81,54 @@ const App = () => {
       show: true
     }
     if (persons.some(person => person.name === newName)) {
-      window.alert(`${newName} is already in use!`)
+      const id = persons.find(person => person.name === newName).id
+      console.log(id)
+      if (window.confirm(`${newName} is already in phonebook, Do you want to update number?`)) {
+        personService
+        .update(id, personObject)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
+            setMessage(`${newName} yhteystiedot päivitetty`)
+            timeout()
+          })
+        .catch(error => {
+          setMessage(
+            `Yhteystieto '${newName}' on jo poistettu`
+          )
+          setPersons(persons.filter(person => person.id !== id))
+          timeout()
+        })
+      }
       setNewName('')
       setNewNumber('')
     } else {
-      setPersons(persons.concat(personObject))
+      personService
+        .create(personObject)
+          .then(returnedPerson => {
+            setPersons(persons.concat(returnedPerson))
+          })
+      setMessage(`${newName} yhteystiedot lisätty`)
+      timeout()
       setNewName('')
       setNewNumber('')
+    }
+  }
+
+  const removePerson = (person) => {
+    if (window.confirm(`Haluatko varmasti poistaa yhteystiedon ${person.name}?`)) {
+      personService
+        .remove(person.id)
+          .then(() => true)
+        .catch(error => {
+          setMessage(
+            `Yhteystieto '${person.name}' on jo poistettu`
+          )
+          timeout()
+        })
+      const id = person.id
+      setPersons(persons.filter(person => person.id !== id))
+      setMessage(`${person.name} yhteystiedot poistettu`)
+      timeout()
     }
   }
 
@@ -87,11 +150,12 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={message} />
       <Filter filter={newFilter} change={handleFilterChange} />
       <h2>Add new</h2>
       <AddPerson addPerson={addPerson} name={newName} handleName={handleNameChange} number={newNumber} handleNumber={handleNumberChange} />
       <h2>Numbers</h2>
-      <ShowPersons persons={persons} filter={newFilter} />
+      <ShowPersons persons={persons} filter={newFilter} action={removePerson} />
     </div>
   )
 
