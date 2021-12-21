@@ -104,9 +104,13 @@ const App = () => {
     } else {
       personService
         .create(personObject)
-          .then(returnedPerson => {
-            setPersons(persons.concat(returnedPerson))
-          })
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+        })
+        .catch(error => {
+          setMessage(error.response.data.error)
+          console.log(error.response.data)
+        })
       setMessage(`${newName} yhteystiedot lisätty`)
       timeout()
       setNewName('')
