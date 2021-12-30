@@ -1,0 +1,25 @@
+{
+  "name": "blogilista-back",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "build:ui": "rm -rf build && cd ../blogilista-front && npm run build && cp -r build ../blogilista-back",
+    "lint": "eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "santeripitkanen",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.2",
+    "mongoose": "^6.1.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.5.0",
+    "nodemon": "^2.0.15"
+  }
+}
