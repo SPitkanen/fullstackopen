@@ -1,5 +1,6 @@
 const config = require('./utils/config')
 const express = require('express')
+require('express-async-errors')
 const app = express()
 const cors = require('cors')
 const notesRouter = require('./controllers/blogs')
@@ -9,6 +10,7 @@ const mongoose = require('mongoose')
 
 logger.info('Connecting to', config.MONGODB_URI)
 
+mongoose.set('bufferTimeoutMS', 30000)
 mongoose.connect(config.MONGODB_URI)
     .then(() => {
         logger.info('Connecting to MongoDB')
