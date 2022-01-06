@@ -18,6 +18,10 @@ const blogSchema = new mongoose.Schema({
     },
     votes: {
         type: Number,
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
 })
 
