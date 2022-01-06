@@ -3,13 +3,41 @@ const supertest = require('supertest')
 const helper = require('./test_helper')
 const app = require('../app')
 const api = supertest(app)
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
+let token
 
 jest.setTimeout(30000)
 beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('salasana', 10)
+    const user = new User({username: 'usrname', passwordHash})
+
+    await user.save()
+
+    const loginCreditentials = {
+        username: 'usrname',
+        password: 'salasana'
+    }
+
+    const loginResponse = await api
+        .post('/api/login')
+        .send(loginCreditentials)
+
+    token = loginResponse.body.token
+
     await Blog.deleteMany({})
-    await Blog.insertMany(helper.initialBlogs)
+    for (let blog of helper.initialBlogs) {
+        await api
+            .post('/api/blogs')
+            .send(blog)
+            .set('Authorization', `Bearer ${token}`)
+    }
 })
 
 test('blogs are returned as json', async () => {
@@ -37,6 +65,7 @@ test('valid blogs can be added', async () => {
     await api
         .post('/api/blogs')
         .send(newBlog)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200)
 
     const newBlogList = await helper.blogsInDb()
@@ -54,6 +83,7 @@ test('when adding new blog, default votes is 0', async () => {
     await api
         .post('/api/blogs')
         .send(newBlog)
+        .set('Authorization', `Bearer ${token}`)
         .expect(200)
 
     const newBlogList = await helper.blogsInDb()
@@ -72,6 +102,7 @@ describe('blog cannot be added without', () => {
         await api
             .post('/api/blogs')
             .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
             .expect(400)
     })
 
@@ -84,6 +115,7 @@ describe('blog cannot be added without', () => {
         await api
             .post('/api/blogs')
             .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
             .expect(400)
     })
 
@@ -96,6 +128,7 @@ describe('blog cannot be added without', () => {
         await api
             .post('/api/blogs')
             .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
             .expect(400)
     })
 })
@@ -104,9 +137,10 @@ describe('removing blog', () => {
     test('succeeds with correct id', async () => {
         const initialBlogs = await helper.blogsInDb()
         const firstBlog = initialBlogs[0]
-    
+        
         await api
             .delete(`/api/blogs/${firstBlog.id}`)
+            .set('Authorization', `Bearer ${token}`)
             .expect(204)
     
         const newBlogList = await helper.blogsInDb()
@@ -120,6 +154,7 @@ describe('removing blog', () => {
     
         await api
             .delete(`/api/blogs/${firstBlog.id}dgsn`)
+            .set('Authorization', `Bearer ${token}`)
             .expect(400)
     
         const newBlogList = await helper.blogsInDb()
@@ -142,6 +177,7 @@ describe('updating votes', () => {
         await api
             .put(`/api/blogs/${firstBlog.id}`)
             .send(updatedBlog)
+            .set('Authorization', `Bearer ${token}`)
 
         const updatedBlogs = await helper.blogsInDb()
         const updatedFirstBlog = updatedBlogs[0]
@@ -162,6 +198,7 @@ describe('updating votes', () => {
         await api
             .put(`/api/blogs/${firstBlog.id}sfgv`)
             .send(updatedBlog)
+            .set('Authorization', `Bearer ${token}`)
             .expect(400)
 
         const updatedBlogs = await helper.blogsInDb()
