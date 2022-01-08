@@ -52,18 +52,18 @@ blogRouter.post('/', userExtractor, async (request, response) => {
     }
   })
   
-  blogRouter.put('/:id', async (request, response) => {
+  blogRouter.put('/:id', userExtractor, async (request, response) => {
     const body = request.body
   
-    const blog = {
+    const updatedBlog = {
       title: body.title,
       author: body.author,
       url: body.url,
       votes: body.votes,
     }
-  
-    await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-    response.json(updatedBlog.toJSON())
+    
+    responseBlog = await Blog.findByIdAndUpdate(request.params.id, updatedBlog, { new: true })
+    response.json(responseBlog.toJSON())
   })
   
   module.exports = blogRouter
