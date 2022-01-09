@@ -7,11 +7,11 @@ import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 import Blog from './components/Blog'
 
-const ShowBlogs = ({blogs, vote, remove}) => {
+const ShowBlogs = ({ blogs, vote, remove }) => {
   return (
     <div>
       <h2>Blogs</h2>
-      {blogs.sort((a, b) => b.votes - a.votes).map(blog => <Blog key={blog.id} blog={blog} vote={vote} remove={remove}/>)}
+      {blogs.sort((a, b) => b.votes - a.votes).map(blog => <Blog key={blog.id} blog={blog} vote={vote} remove={remove} />)}
     </div>
   )
 }
@@ -28,9 +28,9 @@ const App = () => {
   useEffect(() => {
     blogService
       .getAll()
-        .then(initialBlogs => {
-          setBlogs(initialBlogs)
-        })
+      .then(initialBlogs => {
+        setBlogs(initialBlogs)
+      })
   }, [])
 
   useEffect(() => {
@@ -54,9 +54,9 @@ const App = () => {
 
   const createMessage = (message) => {
     setMessage(message)
-        setTimeout(() => {
-          setMessage(null)
-        }, 5000)
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
   }
 
   const handleVoteChange = (blog) => {
@@ -69,7 +69,7 @@ const App = () => {
       url: blog.url,
       votes: votes,
     }
-    
+
     blogService
       .update(id, newBlog)
       .then(returnedBlog => {
@@ -91,7 +91,7 @@ const App = () => {
       })
       .catch(error => {
         console.log(error.response.data)
-        createMessage(`Failed to add new blog`)
+        createMessage('Failed to add new blog')
       })
   }
 
@@ -141,7 +141,7 @@ const App = () => {
   }
 
   const loginForm = () => (
-    <LoginForm 
+    <LoginForm
       handleLogin={handleLogin}
       username={username}
       password={password}
@@ -154,9 +154,9 @@ const App = () => {
     <div>
       <p>{user.name} logged in</p><button onClick={handleLogout}>Logout</button>
       <Togglable buttonLabel="New Blog" ref={blogFormRef}>
-        <BlogForm createBlog={addBlog}/>
+        <BlogForm createBlog={addBlog} />
       </Togglable>
-      <ShowBlogs blogs={blogs} vote={handleVoteChange} remove={removeBlog}/>
+      <ShowBlogs blogs={blogs} vote={handleVoteChange} remove={removeBlog} />
     </div>
   )
 
@@ -166,7 +166,7 @@ const App = () => {
 
       <Notification message={message} />
 
-      {user ===  null ?
+      {user === null ?
         loginForm() :
         showLoggenInPage()
       }
