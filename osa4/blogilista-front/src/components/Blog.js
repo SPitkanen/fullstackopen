@@ -16,10 +16,10 @@ const Blog = ({
 
   return (
     <div>
-      <div style={hideWhenVisible}>
+      <div style={hideWhenVisible} className="defaultContent">
         <h2>{blog.title}</h2><button onClick={toggleVisibility}>View</button>
       </div>
-      <div style={showWhenVisible}>
+      <div style={showWhenVisible} className="togglableContent">
         <h2>{blog.title}</h2><button onClick={toggleVisibility}>Hide</button>
         <ul>
           <li>Author: {blog.author}</li>
