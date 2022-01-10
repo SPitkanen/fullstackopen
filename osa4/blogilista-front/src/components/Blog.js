@@ -17,16 +17,14 @@ const Blog = ({
   return (
     <div>
       <div style={hideWhenVisible} className="defaultContent">
-        <h2>{blog.title}</h2><button onClick={toggleVisibility}>View</button>
+        <h2>{blog.title}</h2><button id="viewButton" onClick={toggleVisibility}>View</button>
       </div>
       <div style={showWhenVisible} className="togglableContent">
-        <h2>{blog.title}</h2><button onClick={toggleVisibility}>Hide</button>
-        <ul>
-          <li>Author: {blog.author}</li>
-          <li>Link: {blog.url}</li>
-          <li>Votes on this blog: {blog.votes}<button onClick={() => vote(blog)}>Vote</button></li>
-        </ul>
-        <button onClick={() => remove(blog)}>Remove</button>
+        <h2>{blog.title}</h2><button id="hideButton" onClick={toggleVisibility}>Hide</button>
+        <p>Author: {blog.author}</p>
+        <p>Link: {blog.url}</p>
+        <p>Votes on this blog: {blog.votes.toString()}</p><button id="voteButton" onClick={() => vote(blog)}>Vote</button>
+        <button id="removeButton" onClick={() => remove(blog)}>Remove</button>
       </div>
     </div>
   )
